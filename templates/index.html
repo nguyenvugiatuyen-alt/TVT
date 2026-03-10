@@ -56,6 +56,17 @@
     <h1 class="header-title">Hệ Thống Quản Lý Phim (Vĩnh Viễn)</h1>
 
     <div class="filter-bar">
+        <div class="filter-group">
+            <label>Sắp xếp theo</label>
+            <select id="sortFilter" onchange="sortMovies()">
+                <option value="default">Mặc định</option>
+                <option value="name_asc">Tên (A -> Z)</option>
+                <option value="name_desc">Tên (Z -> A)</option>
+                <option value="date_desc">Ngày chiếu (Mới nhất)</option>
+                <option value="date_asc">Ngày chiếu (Cũ nhất)</option>
+            </select>
+        </div>
+        
         <div class="filter-group" style="flex: 1.5;">
             <label>Tìm kiếm nhanh</label>
             <input type="text" id="mainSearch" placeholder="Tên phim hoặc đạo diễn..." onkeyup="filterAll()">
