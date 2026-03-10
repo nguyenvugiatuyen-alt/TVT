@@ -1,82 +1,80 @@
-import pandas as pd
-from flask import Flask, render_template, request, redirect, url_for
 import os
+from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-EXCEL_FILE = 'RẠP PHIM TVT.xlsx'
 
-def read_data():
-    if not os.path.exists(EXCEL_FILE):
-        df = pd.DataFrame(columns=['TÊN', 'THỂ LOẠI', 'NGÀY CHIẾU', 'THỜI LƯỢNG', 'RATED', 'ĐẠO DIỄN', 'POSTER'])
-        df.to_excel(EXCEL_FILE, index=False)
-        return df
-    
-    try:
-        df = pd.read_excel(EXCEL_FILE).fillna('')
-        if not df.empty and 'NGÀY CHIẾU' in df.columns:
-            # Chuyển đổi ngày tháng an toàn
-            df['NGÀY CHIẾU'] = pd.to_datetime(df['NGÀY CHIẾU'], errors='coerce')
-            df['NGÀY CHIẾU'] = df['NGÀY CHIẾU'].dt.strftime('%d/%m/%Y').fillna('Chưa rõ')
-        return df
-    except Exception as e:
-        print(f"Lỗi đọc file: {e}")
-        return pd.DataFrame(columns=['TÊN', 'THỂ LOẠI', 'NGÀY CHIẾU', 'THỜI LƯỢNG', 'RATED', 'ĐẠO DIỄN', 'POSTER'])
+# KẾT NỐI DATABASE
+# Thay 'URL_DATABASE_CUA_BAN' bằng cái bạn đã copy ở Bước 1
+# Nếu chạy ở máy cá nhân thì dùng tạm sqlite để test
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('postgresql://quanlyphim_db_user:4F3947ei2Rf7WFMml7ACMYqBbDrekRA7@dpg-d6ns0rnkijhs739rk800-a.singapore-postgres.render.com/quanlyphim_db', 'sqlite:///movies.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# ĐỊNH NGHĨA BẢNG DỮ LIỆU
+class Movie(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    genre = db.Column(db.String(100))
+    date = db.Column(db.String(50))
+    duration = db.Column(db.String(50))
+    rated = db.Column(db.String(20))
+    director = db.Column(db.String(100))
+    poster = db.Column(db.String(500))
+
+# Tạo database nếu chưa có
+with app.app_context():
+    db.create_all()
 
 @app.route('/')
 def index():
-    df = read_data()
+    movies = Movie.query.all()
+    # Lấy danh sách thể loại để lọc
+    all_genres = set()
+    for m in movies:
+        if m.genre:
+            for g in m.genre.split(','):
+                all_genres.add(g.strip())
     
-    # SỬA LỖI TẠI ĐÂY: Kiểm tra nếu df trống thì trả về danh sách rỗng thay vì số 0
-    if not df.empty and 'THỂ LOẠI' in df.columns:
-        # Lấy danh sách thể loại và lọc bỏ các giá trị rỗng
-        genres_series = df['THỂ LOẠI'].astype(str).str.split(', ')
-        all_genres = sorted(list(set([item for sublist in genres_series for item in sublist if item.strip()])))
-        
-        # Lấy danh sách Rated thực tế
-        all_rated = sorted([r for r in df['RATED'].unique() if str(r).strip() != ''])
-    else:
-        all_genres = []
-        all_rated = []
-
-    movies = df.to_dict(orient='records')
-    for i, m in enumerate(movies): 
-        m['id'] = i
-        
-    return render_template('index.html', movies=movies, genres=all_genres, rated_list=all_rated)
+    all_rated = sorted(list(set([m.rated for m in movies if m.rated])))
+    return render_template('index.html', movies=movies, genres=sorted(list(all_genres)), rated_list=all_rated)
 
 @app.route('/add', methods=['POST'])
 def add_movie():
-    df = read_data()
-    new_movie = {
-        'TÊN': request.form['name'], 'THỂ LOẠI': request.form['genre'],
-        'NGÀY CHIẾU': request.form['date'], 'THỜI LƯỢNG': request.form['duration'],
-        'RATED': request.form['rated'], 'ĐẠO DIỄN': request.form['director'],
-        'POSTER': request.form['poster']
-    }
-    df = pd.concat([df, pd.DataFrame([new_movie])], ignore_index=True)
-    df.to_excel(EXCEL_FILE, index=False)
+    new_movie = Movie(
+        name=request.form['name'],
+        genre=request.form['genre'],
+        date=request.form['date'],
+        duration=request.form['duration'],
+        rated=request.form['rated'],
+        director=request.form['director'],
+        poster=request.form['poster']
+    )
+    db.session.add(new_movie)
+    db.session.commit()
     return redirect(url_for('index'))
 
 @app.route('/edit/<int:id>', methods=['POST'])
 def edit_movie(id):
-    df = read_data()
-    if id < len(df):
-        df.loc[id, 'TÊN'] = request.form['name']
-        df.loc[id, 'ĐẠO DIỄN'] = request.form['director']
-        df.loc[id, 'THỂ LOẠI'] = request.form['genre']
-        df.loc[id, 'NGÀY CHIẾU'] = request.form['date']
-        df.loc[id, 'THỜI LƯỢNG'] = request.form['duration']
-        df.loc[id, 'RATED'] = request.form['rated']
-        df.loc[id, 'POSTER'] = request.form['poster']
-        df.to_excel(EXCEL_FILE, index=False)
+    movie = Movie.query.get(id)
+    if movie:
+        movie.name = request.form['name']
+        movie.genre = request.form['genre']
+        movie.date = request.form['date']
+        movie.duration = request.form['duration']
+        movie.rated = request.form['rated']
+        movie.director = request.form['director']
+        movie.poster = request.form['poster']
+        db.session.commit()
     return redirect(url_for('index'))
 
 @app.route('/delete/<int:id>')
 def delete_movie(id):
-    df = read_data()
-    if id < len(df):
-        df = df.drop(df.index[id]).reset_index(drop=True)
-        df.to_excel(EXCEL_FILE, index=False)
+    movie = Movie.query.get(id)
+    if movie:
+        db.session.delete(movie)
+        db.session.commit()
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
