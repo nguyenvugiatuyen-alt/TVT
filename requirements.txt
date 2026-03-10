@@ -1,5 +1,5 @@
-flask
-gunicorn
+Flask
 pandas
-openpyxl
-numpy
+gunicorn
+psycopg2-binary
+Flask-SQLAlchemy
