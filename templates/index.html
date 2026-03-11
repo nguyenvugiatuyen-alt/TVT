@@ -157,7 +157,8 @@
     function filterAll() {
         const query = document.getElementById('mainSearch').value.toLowerCase();
         const genre = document.getElementById('genreFilter').value.toLowerCase();
-        const rated = document.getElementById('ratedFilter').value;
+        // Cập nhật lấy Rated, đồng bộ chữ hoa chữ thường
+        const rated = document.getElementById('ratedFilter').value.trim().toLowerCase(); 
         const start = document.getElementById('dateStart').value;
         const end = document.getElementById('dateEnd').value;
         const startTs = start ? new Date(start).getTime() : null;
@@ -170,7 +171,8 @@
 
             if (query && !d.name.includes(query) && !d.director.includes(query)) isVisible = false;
             if (genre && !d.genre.includes(genre)) isVisible = false;
-            if (rated && d.rated !== rated) isVisible = false;
+            // Cập nhật logic lọc Rated chống sai sót dấu cách hay viết hoa/thường
+            if (rated && d.rated.trim().toLowerCase() !== rated) isVisible = false; 
             if (startTs && cDateTs < startTs) isVisible = false;
             if (endTs && cDateTs > endTs) isVisible = false;
 
@@ -178,22 +180,19 @@
         });
     }
 
-    // MỚI THÊM: Hàm xử lý sắp xếp phim
     function sortMovies() {
         const type = document.getElementById('sortFilter').value;
         const grid = document.getElementById('movieGrid');
         const cards = Array.from(grid.getElementsByClassName('movie-card'));
 
-        if (!type) return; // Nếu chọn "Mặc định" thì không làm gì
+        if (!type) return; 
 
         cards.sort((a, b) => {
             if (type.startsWith('name')) {
-                // Sắp xếp Alphabet hỗ trợ tiếng Việt
                 let valA = a.dataset.name;
                 let valB = b.dataset.name;
                 return type === 'name_asc' ? valA.localeCompare(valB, 'vi') : valB.localeCompare(valA, 'vi');
             } else if (type.startsWith('date')) {
-                // Tận dụng hàm parseDate sẵn có của bạn để xếp ngày
                 let valA = parseDate(a.dataset.date);
                 let valB = parseDate(b.dataset.date);
                 return type === 'date_asc' ? valA - valB : valB - valA;
@@ -201,7 +200,6 @@
             return 0;
         });
 
-        // Xếp lại các thẻ HTML lên giao diện
         cards.forEach(card => grid.appendChild(card));
     }
 
