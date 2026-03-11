@@ -3,202 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TVT CINEMA DATABASE</title>
+    <title>RẠP PHIM TVT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --tvt-red: #e71a0f; --dark: #1a1a1a; }
-        body { font-family: 'Segoe UI', sans-serif; background: #fdfcf0; margin: 0; padding: 20px; }
-        .container { max-width: 1450px; margin: auto; }
-        .header-title { color: var(--tvt-red); text-align: center; text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px; }
-
-        /* THANH CÔNG CỤ */
-        .filter-bar { 
-            background: #fff; padding: 25px; border-radius: 15px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-            display: flex; flex-wrap: wrap; gap: 20px; 
-            align-items: flex-end; justify-content: space-between; margin-bottom: 40px;
-        }
-        .filter-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 150px; }
-        .filter-group label { font-size: 12px; font-weight: 900; color: var(--tvt-red); text-transform: uppercase; }
+        :root { --primary: #e50914; --bg: #141414; --card-bg: #2f2f2f; --text: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
         
-        input, select { height: 42px; width: 100%; padding: 0 12px; border: 1px solid #ccc; border-radius: 8px; outline: none; font-size: 13px; background: #fdfdfd; box-sizing: border-box; }
-        .btn-search { background: var(--tvt-red); color: white; border: none; padding: 0 30px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 42px; text-transform: uppercase; transition: 0.3s; }
+        /* Navbar */
+        .navbar { background: rgba(0,0,0,0.9); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .logo { color: var(--primary); font-size: 24px; font-weight: bold; text-decoration: none; }
+        
+        /* Search & Controls */
+        .controls-bar { background: #1a1a1a; padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; border-bottom: 3px solid var(--primary); }
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        .control-group label { font-size: 12px; color: var(--primary); font-weight: bold; }
+        input, select { background: #333; color: white; border: 1px solid #444; padding: 8px 12px; border-radius: 5px; }
 
-        /* MOVIE GRID */
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
-        .movie-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); position: relative; display: flex; flex-direction: column; transition: 0.3s; }
-        .poster-box { position: relative; height: 380px; background: #000; overflow: hidden; }
-        .poster-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
-        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; opacity: 0; transition: 0.3s; z-index: 2; }
-        .movie-card:hover .overlay { opacity: 1; }
-        .movie-card:hover img { filter: blur(4px); transform: scale(1.05); }
+        /* Movie Grid */
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; padding: 30px; }
+        .movie-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .movie-card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(229,9,20,0.4); }
+        .movie-card img { width: 100%; height: 320px; object-fit: cover; }
+        .movie-info { padding: 15px; }
+        .movie-info h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: var(--primary); height: 2.6rem; overflow: hidden; }
+        .movie-meta { font-size: 0.85rem; color: #ccc; line-height: 1.6; }
+        .movie-meta i { color: var(--primary); width: 20px; }
 
-        .btn-action { width: 120px; padding: 10px; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 12px; }
-        .btn-edit { background: #ff9800; }
-        .btn-del { background: var(--tvt-red); }
+        /* Buttons */
+        .btn { padding: 8px 16px; border-radius: 5px; cursor: pointer; border: none; font-weight: bold; text-decoration: none; display: inline-block; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-edit { background: #444; color: white; font-size: 12px; margin-top: 10px; }
+        .btn-delete { background: transparent; color: #ff4444; font-size: 12px; }
 
-        .info { padding: 18px; flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
-        .title { font-weight: 800; font-size: 16px; color: #000; height: 44px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-transform: uppercase; margin: 0; line-height: 1.4; }
-        .meta-item { font-size: 13px; color: #555; }
-        .tag { background: #fef2f2; color: var(--tvt-red); padding: 3px 10px; border-radius: 4px; font-weight: 800; font-size: 11px; border: 1px solid #fecaca; width: fit-content; margin-top: 10px; }
-
-        .fab { position: fixed; bottom: 35px; right: 35px; width: 65px; height: 65px; background: var(--tvt-red); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; cursor: pointer; box-shadow: 0 8px 20px rgba(231,26,15,0.3); z-index: 99; transition: 0.3s; }
-        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; padding: 20px; overflow-y: auto; }
-        .modal-content { background:#fff; width:100%; max-width:500px; margin:30px auto; padding:35px; border-radius:20px; position:relative; }
-        .modal-content label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #555; text-transform: uppercase; }
-        .modal-content input { width: 100%; margin-bottom: 18px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .close-btn { position: absolute; top: 20px; right: 25px; font-size: 28px; cursor: pointer; color: #bbb; }
+        /* Modal (Bảng hiện lên để thêm/sửa phim) */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+        .modal-content { background: #222; margin: 5% auto; padding: 25px; width: 400px; border-radius: 10px; border: 1px solid var(--primary); }
+        .modal-content h2 { color: var(--primary); margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; }
+        .form-group input { width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1 class="header-title">Hệ Thống Quản Lý Phim TVT </h1>
+<div class="navbar">
+    <a href="/" class="logo">TVT CINEMA</a>
+    <button class="btn btn-add" onclick="showModal('addModal')"><i class="fa-solid fa-plus"></i> Thêm phim mới</button>
+</div>
 
-    <div class="filter-bar">
-        <div class="filter-group">
-            <label>Sắp xếp theo</label>
-            <select id="sortFilter" onchange="sortMovies()">
-                <option value="default">Mặc định</option>
-                <option value="name_asc">Tên (A -> Z)</option>
-                <option value="name_desc">Tên (Z -> A)</option>
-                <option value="date_desc">Ngày chiếu (Mới nhất)</option>
-                <option value="date_asc">Ngày chiếu (Cũ nhất)</option>
-            </select>
-        </div>
-        
-        <div class="filter-group" style="flex: 1.5;">
-            <label>Tìm kiếm nhanh</label>
-            <input type="text" id="mainSearch" placeholder="Tên phim hoặc đạo diễn..." onkeyup="filterAll()">
-        </div>
-        
-        <div class="filter-group">
-            <label>Thể loại</label>
-            <select id="genreFilter" onchange="filterAll()">
-                <option value="">Tất cả</option>
-                {% for g in genres %} <option value="{{ g }}">{{ g }}</option> {% endfor %}
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label>Phân loại (Rated)</label>
-            <select id="ratedFilter" onchange="filterAll()">
-                <option value="">Tất cả</option>
-                {% for r in rated_list %} <option value="{{ r }}">{{ r }}</option> {% endfor %}
-            </select>
-        </div>
-
-        <div class="filter-group" style="flex: 1.2;">
-            <label>Khoảng ngày chiếu</label>
-            <div style="display: flex; gap: 8px;">
-                <input type="date" id="dateStart">
-                <input type="date" id="dateEnd">
-            </div>
-        </div>
-
-        <button class="btn-search" onclick="filterAll()">Lọc dữ liệu</button>
+<div class="controls-bar">
+    <div class="control-group">
+        <label>TÌM KIẾM</label>
+        <input type="text" id="searchInput" placeholder="Nhập tên phim..." onkeyup="filterMovies()">
     </div>
-
-    <div class="movie-grid" id="movieGrid">
-        {% for m in movies %}
-        <div class="movie-card" 
-             data-name="{{ m.name|lower }}" 
-             data-director="{{ m.director|lower }}"
-             data-genre="{{ m.genre|lower }}"
-             data-rated="{{ m.rated }}"
-             data-date="{{ m.date }}"
-             data-poster="{{ m.poster }}">
-            <div class="poster-box">
-                <img src="{{ m.poster }}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
-                <div class="overlay">
-                    <button class="btn-action btn-edit" onclick="openEditModal('{{ m.id }}', '{{ m.name }}', '{{ m.director }}', '{{ m.genre }}', '{{ m.date }}', '{{ m.duration }}', '{{ m.rated }}', '{{ m.poster }}')">CHỈNH SỬA</button>
-                    <a href="/delete/{{ m.id }}" class="btn-action btn-del" onclick="return confirm('Xóa phim này?')">XOÁ PHIM</a>
-                </div>
-            </div>
-            <div class="info">
-                <p class="title">{{ m.name }}</p>
-                <div class="meta-item"><b>Đạo diễn:</b> {{ m.director }}</div>
-                <div class="meta-item"><b>Thể loại:</b> {{ m.genre }}</div>
-                <div class="meta-item"><b>Khởi chiếu:</b> {{ m.date }}</div>
-                <div class="meta-item"><b>Thời lượng:</b> {{ m.duration }}</div>
-                <span class="tag">{{ m.rated }}</span>
-            </div>
-        </div>
-        {% endfor %}
+    <div class="control-group">
+        <label>SẮP XẾP</label>
+        <select id="sortFilter" onchange="sortMovies()">
+            <option value="default">Mặc định</option>
+            <option value="name_asc">Tên (A-Z)</option>
+            <option value="name_desc">Tên (Z-A)</option>
+            <option value="date_desc">Mới nhất</option>
+            <option value="date_asc">Cũ nhất</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label>THỂ LOẠI</label>
+        <select id="genreFilter" onchange="filterMovies()">
+            <option value="all">Tất cả</option>
+            {% for g in genres %}
+            <option value="{{ g }}">{{ g }}</option>
+            {% endfor %}
+        </select>
     </div>
 </div>
 
-<div class="fab" onclick="openAddModal()"><i class="fa fa-plus"></i></div>
+<div class="movie-grid" id="movieGrid">
+    {% for movie in movies %}
+    <div class="movie-card" data-name="{{ movie.name }}" data-date="{{ movie.date }}" data-genre="{{ movie.genre }}">
+        <img src="{{ movie.poster or 'https://via.placeholder.com/220x320' }}" alt="{{ movie.name }}">
+        <div class="movie-info">
+            <h3>{{ movie.name }}</h3>
+            <div class="movie-meta">
+                <div><i class="fa-solid fa-film"></i> {{ movie.genre }}</div>
+                <div><i class="fa-solid fa-calendar-days"></i> {{ movie.date }}</div>
+                <div><i class="fa-solid fa-clock"></i> {{ movie.duration }}</div>
+                <div><i class="fa-solid fa-user-tie"></i> {{ movie.director }}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn btn-edit" onclick="showEditModal('{{ movie.id }}', '{{ movie.name }}', '{{ movie.genre }}', '{{ movie.date }}', '{{ movie.duration }}', '{{ movie.rated }}', '{{ movie.director }}', '{{ movie.poster }}')">Sửa</button>
+                <a href="/delete/{{ movie.id }}" class="btn btn-delete" onclick="return confirm('Xóa bộ phim này?')">Xóa</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
-<div id="movieModal" class="modal">
+<div id="addModal" class="modal">
     <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        <h3 id="modalTitle" style="color:var(--tvt-red); margin-top:0; text-transform: uppercase;">Quản lý phim</h3>
-        <form id="movieForm" method="POST">
-            <label>Tên phim</label><input type="text" name="name" id="f_name" required>
-            <label>Đạo diễn</label><input type="text" name="director" id="f_director">
-            <label>Thể loại</label><input type="text" name="genre" id="f_genre">
-            <label>Ngày chiếu</label><input type="text" name="date" id="f_date" placeholder="25/12/2026">
-            <label>Thời lượng</label><input type="text" name="duration" id="f_duration">
-            <label>Rated</label><input type="text" name="rated" id="f_rated">
-            <label>Link Poster</label><input type="text" name="poster" id="f_poster">
-            <button type="submit" class="btn-search" style="width:100%;">LƯU THÔNG TIN</button>
+        <h2>Thêm phim mới</h2>
+        <form action="/add" method="POST">
+            <div class="form-group"><label>Tên phim</label><input type="text" name="name" required></div>
+            <div class="form-group"><label>Thể loại</label><input type="text" name="genre"></div>
+            <div class="form-group"><label>Ngày chiếu</label><input type="text" name="date" placeholder="dd/mm/yyyy"></div>
+            <div class="form-group"><label>Thời lượng</label><input type="text" name="duration"></div>
+            <div class="form-group"><label>Rated</label><input type="text" name="rated"></div>
+            <div class="form-group"><label>Đạo diễn</label><input type="text" name="director"></div>
+            <div class="form-group"><label>Link Poster</label><input type="text" name="poster"></div>
+            <button type="submit" class="btn btn-add">Lưu phim</button>
+            <button type="button" class="btn" onclick="closeModal('addModal')">Hủy</button>
         </form>
     </div>
 </div>
 
 <script>
-    function parseDate(str) {
-        if (!str || !str.includes('/')) return 0;
-        let p = str.split('/');
-        return new Date(p[2], p[1]-1, p[0]).getTime();
-    }
+    function showModal(id) { document.getElementById(id).style.display = "block"; }
+    function closeModal(id) { document.getElementById(id).style.display = "none"; }
 
-    function filterAll() {
-        const query = document.getElementById('mainSearch').value.toLowerCase();
-        const genre = document.getElementById('genreFilter').value.toLowerCase();
-        const rated = document.getElementById('ratedFilter').value;
-        const start = document.getElementById('dateStart').value;
-        const end = document.getElementById('dateEnd').value;
-        const startTs = start ? new Date(start).getTime() : null;
-        const endTs = end ? new Date(end).getTime() : null;
-
+    function filterMovies() {
+        const s = document.getElementById('searchInput').value.toLowerCase();
+        const g = document.getElementById('genreFilter').value;
         document.querySelectorAll('.movie-card').forEach(card => {
-            let isVisible = true;
-            const d = card.dataset;
-            const cDateTs = parseDate(d.date);
-
-            if (query && !d.name.includes(query) && !d.director.includes(query)) isVisible = false;
-            if (genre && !d.genre.includes(genre)) isVisible = false;
-            if (rated && d.rated !== rated) isVisible = false;
-            if (startTs && cDateTs < startTs) isVisible = false;
-            if (endTs && cDateTs > endTs) isVisible = false;
-
-            card.style.display = isVisible ? "flex" : "none";
+            const matchS = card.dataset.name.toLowerCase().includes(s);
+            const matchG = g === 'all' || card.dataset.genre.includes(g);
+            card.style.display = (matchS && matchG) ? "block" : "none";
         });
     }
 
-    function openAddModal() {
-        document.getElementById('modalTitle').innerText = "THÊM PHIM MỚI";
-        document.getElementById('movieForm').action = "/add";
-        document.getElementById('movieForm').reset();
-        document.getElementById('movieModal').style.display = 'block';
+    function parseDate(str) {
+        if(!str) return 0;
+        let p = str.split('/');
+        return p.length === 3 ? new Date(p[2], p[1]-1, p[0]).getTime() : new Date(str).getTime() || 0;
     }
 
-    function openEditModal(id, name, dir, gen, date, dur, rat, pos) {
-        document.getElementById('modalTitle').innerText = "CHỈNH SỬA PHIM";
-        document.getElementById('movieForm').action = "/edit/" + id;
-        document.getElementById('f_name').value = name;
-        document.getElementById('f_director').value = dir;
-        document.getElementById('f_genre').value = gen;
-        document.getElementById('f_date').value = date;
-        document.getElementById('f_duration').value = dur;
-        document.getElementById('f_rated').value = rat;
-        document.getElementById('f_poster').value = pos;
-        document.getElementById('movieModal').style.display = 'block';
+    function sortMovies() {
+        const type = document.getElementById('sortFilter').value;
+        const grid = document.getElementById('movieGrid');
+        const cards = Array.from(grid.getElementsByClassName('movie-card'));
+        if(type === 'default') return;
+        cards.sort((a,b) => {
+            if(type.includes('name')) {
+                return type.includes('asc') ? a.dataset.name.localeCompare(b.dataset.name, 'vi') : b.dataset.name.localeCompare(a.dataset.name, 'vi');
+            } else {
+                return type.includes('asc') ? parseDate(a.dataset.date) - parseDate(b.dataset.date) : parseDate(b.dataset.date) - parseDate(a.dataset.date);
+            }
+        });
+        cards.forEach(c => grid.appendChild(c));
     }
-
-    function closeModal() { document.getElementById('movieModal').style.display = 'none'; }
 </script>
 </body>
 </html>
