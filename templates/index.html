@@ -3,95 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RẠP PHIM TVT</title>
+    <title>TVT CINEMA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #e50914; --bg: #141414; --card-bg: #2f2f2f; --text: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        :root { --primary: #e50914; --bg: #000000; --card-bg: #222222; --text: #ffffff; }
+        body { font-family: 'Arial', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
         
-        /* Navbar */
-        .navbar { background: rgba(0,0,0,0.9); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .logo { color: var(--primary); font-size: 24px; font-weight: bold; text-decoration: none; }
+        /* Header */
+        .header { background: #000; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; }
+        .logo { color: var(--primary); font-size: 26px; font-weight: bold; text-decoration: none; text-transform: uppercase; }
         
-        /* Search & Controls */
-        .controls-bar { background: #1a1a1a; padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; border-bottom: 3px solid var(--primary); }
-        .control-group { display: flex; flex-direction: column; gap: 5px; }
-        .control-group label { font-size: 12px; color: var(--primary); font-weight: bold; }
-        input, select { background: #333; color: white; border: 1px solid #444; padding: 8px 12px; border-radius: 5px; }
+        /* Search & Filters Bar */
+        .filter-bar { background: #111; padding: 20px 25px; border-bottom: 2px solid var(--primary); }
+        .filter-container { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .filter-group label { font-size: 12px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+        
+        input, select { background: #333; color: white; border: 1px solid #444; padding: 8px 12px; border-radius: 4px; font-size: 13px; }
+        .search-input { width: 250px; }
 
         /* Movie Grid */
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; padding: 30px; }
-        .movie-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .movie-card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(229,9,20,0.4); }
-        .movie-card img { width: 100%; height: 320px; object-fit: cover; }
-        .movie-info { padding: 15px; }
-        .movie-info h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: var(--primary); height: 2.6rem; overflow: hidden; }
-        .movie-meta { font-size: 0.85rem; color: #ccc; line-height: 1.6; }
-        .movie-meta i { color: var(--primary); width: 20px; }
-
-        /* Buttons */
-        .btn { padding: 8px 16px; border-radius: 5px; cursor: pointer; border: none; font-weight: bold; text-decoration: none; display: inline-block; }
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; padding: 25px; }
+        .movie-card { background: var(--card-bg); border-radius: 8px; overflow: hidden; transition: 0.3s; }
+        .movie-card:hover { transform: scale(1.03); box-shadow: 0 0 15px rgba(229,9,20,0.3); }
+        
+        .poster-container { position: relative; width: 100%; height: 320px; }
+        .poster-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .movie-content { padding: 15px; }
+        .movie-title { color: var(--primary); font-size: 16px; font-weight: bold; margin: 0 0 10px 0; height: 40px; overflow: hidden; text-transform: uppercase; }
+        
+        .info-item { font-size: 13px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; color: #bbb; }
+        .info-item i { color: var(--primary); width: 15px; margin-top: 3px; }
+        
+        /* Action Buttons */
+        .actions { display: flex; justify-content: space-between; margin-top: 15px; }
+        .btn { padding: 6px 15px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; border: none; text-decoration: none; transition: 0.2s; }
         .btn-add { background: var(--primary); color: white; }
-        .btn-edit { background: #444; color: white; font-size: 12px; margin-top: 10px; }
-        .btn-delete { background: transparent; color: #ff4444; font-size: 12px; }
+        .btn-edit { background: #444; color: white; }
+        .btn-edit:hover { background: #555; }
+        .btn-delete { background: transparent; color: var(--primary); }
+        .btn-delete:hover { text-decoration: underline; }
 
-        /* Modal (Bảng hiện lên để thêm/sửa phim) */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
-        .modal-content { background: #222; margin: 5% auto; padding: 25px; width: 400px; border-radius: 10px; border: 1px solid var(--primary); }
-        .modal-content h2 { color: var(--primary); margin-top: 0; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; }
-        .form-group input { width: 100%; box-sizing: border-box; }
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+        .modal-content { background: #1a1a1a; margin: 50px auto; padding: 25px; width: 90%; max-width: 450px; border-radius: 8px; border: 1px solid var(--primary); }
+        .form-row { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
     </style>
 </head>
 <body>
 
-<div class="navbar">
+<div class="header">
     <a href="/" class="logo">TVT CINEMA</a>
-    <button class="btn btn-add" onclick="showModal('addModal')"><i class="fa-solid fa-plus"></i> Thêm phim mới</button>
+    <button class="btn btn-add" onclick="document.getElementById('addModal').style.display='block'">+ Thêm phim mới</button>
 </div>
 
-<div class="controls-bar">
-    <div class="control-group">
-        <label>TÌM KIẾM</label>
-        <input type="text" id="searchInput" placeholder="Nhập tên phim..." onkeyup="filterMovies()">
-    </div>
-    <div class="control-group">
-        <label>SẮP XẾP</label>
-        <select id="sortFilter" onchange="sortMovies()">
-            <option value="default">Mặc định</option>
-            <option value="name_asc">Tên (A-Z)</option>
-            <option value="name_desc">Tên (Z-A)</option>
-            <option value="date_desc">Mới nhất</option>
-            <option value="date_asc">Cũ nhất</option>
-        </select>
-    </div>
-    <div class="control-group">
-        <label>THỂ LOẠI</label>
-        <select id="genreFilter" onchange="filterMovies()">
-            <option value="all">Tất cả</option>
-            {% for g in genres %}
-            <option value="{{ g }}">{{ g }}</option>
-            {% endfor %}
-        </select>
+<div class="filter-bar">
+    <div class="filter-container">
+        <div class="filter-group">
+            <label>Tìm kiếm</label>
+            <input type="text" id="searchInput" class="search-input" placeholder="Nhập tên phim..." onkeyup="runFilters()">
+        </div>
+        <div class="filter-group">
+            <label>Sắp xếp</label>
+            <select id="sortFilter" onchange="sortMovies()">
+                <option value="default">Mặc định</option>
+                <option value="name_asc">Tên (A-Z)</option>
+                <option value="name_desc">Tên (Z-A)</option>
+                <option value="date_desc">Ngày chiếu (Mới nhất)</option>
+                <option value="date_asc">Ngày chiếu (Cũ nhất)</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Thể loại</label>
+            <select id="genreFilter" onchange="runFilters()">
+                <option value="all">Tất cả</option>
+                {% for g in genres %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+            </select>
+        </div>
     </div>
 </div>
 
 <div class="movie-grid" id="movieGrid">
     {% for movie in movies %}
     <div class="movie-card" data-name="{{ movie.name }}" data-date="{{ movie.date }}" data-genre="{{ movie.genre }}">
-        <img src="{{ movie.poster or 'https://via.placeholder.com/220x320' }}" alt="{{ movie.name }}">
-        <div class="movie-info">
-            <h3>{{ movie.name }}</h3>
-            <div class="movie-meta">
-                <div><i class="fa-solid fa-film"></i> {{ movie.genre }}</div>
-                <div><i class="fa-solid fa-calendar-days"></i> {{ movie.date }}</div>
-                <div><i class="fa-solid fa-clock"></i> {{ movie.duration }}</div>
-                <div><i class="fa-solid fa-user-tie"></i> {{ movie.director }}</div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <button class="btn btn-edit" onclick="showEditModal('{{ movie.id }}', '{{ movie.name }}', '{{ movie.genre }}', '{{ movie.date }}', '{{ movie.duration }}', '{{ movie.rated }}', '{{ movie.director }}', '{{ movie.poster }}')">Sửa</button>
-                <a href="/delete/{{ movie.id }}" class="btn btn-delete" onclick="return confirm('Xóa bộ phim này?')">Xóa</a>
+        <div class="poster-container">
+            <img src="{{ movie.poster or 'https://via.placeholder.com/220x320?text=No+Poster' }}" alt="{{ movie.name }}">
+        </div>
+        <div class="movie-content">
+            <div class="movie-title">{{ movie.name }}</div>
+            <div class="info-item"><i class="fa-solid fa-film"></i> <span>{{ movie.genre }}</span></div>
+            <div class="info-item"><i class="fa-solid fa-calendar-days"></i> <span>{{ movie.date }}</span></div>
+            <div class="info-item"><i class="fa-solid fa-clock"></i> <span>{{ movie.duration }}</span></div>
+            <div class="info-item"><i class="fa-solid fa-user-tie"></i> <span>{{ movie.director }}</span></div>
+            
+            <div class="actions">
+                <button class="btn btn-edit" onclick="openEditModal('{{ movie.id }}', '{{ movie.name }}', '{{ movie.genre }}', '{{ movie.date }}', '{{ movie.duration }}', '{{ movie.rated }}', '{{ movie.director }}', '{{ movie.poster }}')">Sửa</button>
+                <a href="/delete/{{ movie.id }}" class="btn btn-delete" onclick="return confirm('Xóa phim này hả ông?')">Xóa</a>
             </div>
         </div>
     </div>
@@ -100,39 +108,37 @@
 
 <div id="addModal" class="modal">
     <div class="modal-content">
-        <h2>Thêm phim mới</h2>
+        <h2 style="color:var(--primary)">THÊM PHIM MỚI</h2>
         <form action="/add" method="POST">
-            <div class="form-group"><label>Tên phim</label><input type="text" name="name" required></div>
-            <div class="form-group"><label>Thể loại</label><input type="text" name="genre"></div>
-            <div class="form-group"><label>Ngày chiếu</label><input type="text" name="date" placeholder="dd/mm/yyyy"></div>
-            <div class="form-group"><label>Thời lượng</label><input type="text" name="duration"></div>
-            <div class="form-group"><label>Rated</label><input type="text" name="rated"></div>
-            <div class="form-group"><label>Đạo diễn</label><input type="text" name="director"></div>
-            <div class="form-group"><label>Link Poster</label><input type="text" name="poster"></div>
-            <button type="submit" class="btn btn-add">Lưu phim</button>
-            <button type="button" class="btn" onclick="closeModal('addModal')">Hủy</button>
+            <div class="form-row"><label>Tên phim</label><input type="text" name="name" required></div>
+            <div class="form-row"><label>Thể loại</label><input type="text" name="genre"></div>
+            <div class="form-row"><label>Ngày chiếu</label><input type="text" name="date" placeholder="dd/mm/yyyy"></div>
+            <div class="form-row"><label>Thời lượng</label><input type="text" name="duration"></div>
+            <div class="form-row"><label>Đạo diễn</label><input type="text" name="director"></div>
+            <div class="form-row"><label>Link Poster</label><input type="text" name="poster"></div>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button type="submit" class="btn btn-add">LƯU LẠI</button>
+                <button type="button" class="btn btn-edit" onclick="document.getElementById('addModal').style.display='none'">HỦY</button>
+            </div>
         </form>
     </div>
 </div>
 
 <script>
-    function showModal(id) { document.getElementById(id).style.display = "block"; }
-    function closeModal(id) { document.getElementById(id).style.display = "none"; }
-
-    function filterMovies() {
+    function runFilters() {
         const s = document.getElementById('searchInput').value.toLowerCase();
         const g = document.getElementById('genreFilter').value;
         document.querySelectorAll('.movie-card').forEach(card => {
-            const matchS = card.dataset.name.toLowerCase().includes(s);
-            const matchG = g === 'all' || card.dataset.genre.includes(g);
-            card.style.display = (matchS && matchG) ? "block" : "none";
+            const name = card.dataset.name.toLowerCase();
+            const genre = card.dataset.genre;
+            card.style.display = (name.includes(s) && (g === 'all' || genre.includes(g))) ? "block" : "none";
         });
     }
 
     function parseDate(str) {
         if(!str) return 0;
-        let p = str.split('/');
-        return p.length === 3 ? new Date(p[2], p[1]-1, p[0]).getTime() : new Date(str).getTime() || 0;
+        let parts = str.split('/');
+        return parts.length === 3 ? new Date(parts[2], parts[1]-1, parts[0]).getTime() : new Date(str).getTime() || 0;
     }
 
     function sortMovies() {
