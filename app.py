@@ -4,10 +4,19 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# KẾT NỐI DATABASE
-# Thay 'URL_DATABASE_CUA_BAN' bằng cái bạn đã copy ở Bước 1
-# Nếu chạy ở máy cá nhân thì dùng tạm sqlite để test
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('postgresql://quanlyphim_db_user:4F3947ei2Rf7WFMml7ACMYqBbDrekRA7@dpg-d6ns0rnkijhs739rk800-a.singapore-postgres.render.com/quanlyphim_db')
+# Cấu hình Database
+# Ưu tiên lấy link từ biến môi trường DATABASE_URL trên Render
+db_url = os.environ.get('postgresql://quanlyphim_db_user:4F3947ei2Rf7WFMml7ACMYqBbDrekRA7@dpg-d6ns0rnkijhs739rk800-a/quanlyphim_db')
+
+if db_url:
+    # Tự động sửa postgres:// thành postgresql:// nếu Render cấp link cũ
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+else:
+    # Nếu không tìm thấy link trên Render, dùng cái link trực tiếp của ông ở đây
+    db_url = 'postgresql://quanlyphim_db_user:4F3947ei2Rf7WFMml7ACMYqBbDrekRA7@dpg-d6ns0rnkijhs739rk800-a.singapore-postgres.render.com/quanlyphim_db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
