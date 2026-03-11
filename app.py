@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 # Cấu hình Database
-db_url = os.environ.get('DATABASE_URL')
+db_url = os.environ.get('postgresql://quanlyphim_db_user:4F3947ei2Rf7WFMml7ACMYqBbDrekRA7@dpg-d6ns0rnkijhs739rk800-a/quanlyphim_db')
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 else:
@@ -32,20 +32,26 @@ with app.app_context():
 @app.route('/')
 def index():
     movies = Movie.query.all()
-    # Logic lấy danh sách thể loại để hiện vào ô chọn (Dropdown)
+    
     all_genres = set()
+    all_rated = set() # Bổ sung set để chứa danh sách Rated
+    
     for m in movies:
         if m.genre:
             for g in m.genre.split(','):
                 all_genres.add(g.strip())
-    return render_template('index.html', movies=movies, genres=sorted(list(all_genres)))
+        if m.rated: # Bổ sung logic lấy các nhãn Rated từ Database
+            all_rated.add(m.rated.strip())
+            
+    # Bổ sung rated_list vào lúc render_template
+    return render_template('index.html', movies=movies, genres=sorted(list(all_genres)), rated_list=sorted(list(all_rated)))
 
-# Đừng quên route delete và add để nút bấm hoạt động
 @app.route('/add', methods=['POST'])
 def add_movie():
     new_movie = Movie(
         name=request.form['name'], genre=request.form['genre'],
         date=request.form['date'], duration=request.form['duration'],
+        rated=request.form.get('rated', ''), # Bổ sung thêm lấy dữ liệu Rated khi lưu phim mới
         director=request.form['director'], poster=request.form['poster']
     )
     db.session.add(new_movie)
