@@ -76,50 +76,6 @@ def delete_movie(id):
         db.session.delete(movie)
         db.session.commit()
     return redirect(url_for('index'))
-    
-@app.route('/import-excel')
-def import_excel():
-    import pandas as pd
-    import os
-    
-    file_path = 'RẠP PHIM TVT.xlsx'
-    if not os.path.exists(file_path):
-        return "Không tìm thấy file Excel trên hệ thống!"
-        
-    try:
-        df = pd.read_excel(file_path).fillna('')
-        count = 0
-        for index, row in df.iterrows():
-            # Bỏ qua nếu tên phim bị trống
-            if not str(row.get('TÊN', '')).strip():
-                continue
-                
-            # Kiểm tra xem phim đã có trong DB chưa (tránh bị nhân đôi nếu lỡ bấm 2 lần)
-            exist = Movie.query.filter_by(name=str(row['TÊN'])).first()
-            if not exist:
-                # Xử lý ngày tháng
-                date_val = row.get('NGÀY CHIẾU', '')
-                if pd.notnull(date_val) and isinstance(date_val, pd.Timestamp):
-                    date_val = date_val.strftime('%d/%m/%Y')
-                else:
-                    date_val = str(date_val)
-
-                new_movie = Movie(
-                    name=str(row['TÊN']),
-                    genre=str(row.get('THỂ LOẠI', '')),
-                    date=date_val,
-                    duration=str(row.get('THỜI LƯỢNG', '')),
-                    rated=str(row.get('RATED', '')),
-                    director=str(row.get('ĐẠO DIỄN', '')),
-                    poster=str(row.get('POSTER', ''))
-                )
-                db.session.add(new_movie)
-                count += 1
-        
-        db.session.commit()
-        return f"<h1>Tuyệt vời! Đã copy thành công {count} phim từ Excel sang Database vĩnh viễn.</h1> <a href='/'>Quay lại trang chủ</a>"
-    except Exception as e:
-        return f"<h1>Bị lỗi rồi: {str(e)}</h1>"
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
