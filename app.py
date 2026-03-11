@@ -91,7 +91,7 @@ def import_excel():
     import pandas as pd
     import os
     
-    file_path = 'RẠP PHIM TVT.xlsx'
+    file_path = 'data.xlsx'
     if not os.path.exists(file_path):
         return "Không tìm thấy file Excel trên hệ thống!"
         
