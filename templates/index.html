@@ -77,6 +77,17 @@
             </select>
         </div>
 
+        <div class="filter-group">
+            <label>Sắp xếp theo</label>
+            <select id="sortFilter" onchange="sortMovies()">
+                <option value="">Mặc định</option>
+                <option value="name_asc">Tên (A-Z)</option>
+                <option value="name_desc">Tên (Z-A)</option>
+                <option value="date_desc">Ngày chiếu (Mới nhất)</option>
+                <option value="date_asc">Ngày chiếu (Cũ nhất)</option>
+            </select>
+        </div>
+
         <div class="filter-group" style="flex: 1.2;">
             <label>Khoảng ngày chiếu</label>
             <div style="display: flex; gap: 8px;">
@@ -165,6 +176,33 @@
 
             card.style.display = isVisible ? "flex" : "none";
         });
+    }
+
+    // MỚI THÊM: Hàm xử lý sắp xếp phim
+    function sortMovies() {
+        const type = document.getElementById('sortFilter').value;
+        const grid = document.getElementById('movieGrid');
+        const cards = Array.from(grid.getElementsByClassName('movie-card'));
+
+        if (!type) return; // Nếu chọn "Mặc định" thì không làm gì
+
+        cards.sort((a, b) => {
+            if (type.startsWith('name')) {
+                // Sắp xếp Alphabet hỗ trợ tiếng Việt
+                let valA = a.dataset.name;
+                let valB = b.dataset.name;
+                return type === 'name_asc' ? valA.localeCompare(valB, 'vi') : valB.localeCompare(valA, 'vi');
+            } else if (type.startsWith('date')) {
+                // Tận dụng hàm parseDate sẵn có của bạn để xếp ngày
+                let valA = parseDate(a.dataset.date);
+                let valB = parseDate(b.dataset.date);
+                return type === 'date_asc' ? valA - valB : valB - valA;
+            }
+            return 0;
+        });
+
+        // Xếp lại các thẻ HTML lên giao diện
+        cards.forEach(card => grid.appendChild(card));
     }
 
     function openAddModal() {
